@@ -30,7 +30,7 @@ Loading the data set
 
 
 ```python
-data_dict = pickle.load(open("../final_project/final_project_dataset.pkl", "rb"))
+data_dict = pickle.load(open("../final_project/final_project_dataset.pkl", "r"))
 df = pd.DataFrame.from_records(list(data_dict.values()))
 employees = pd.Series(list(data_dict.keys()))
 # set the index of df to be the employees series:
@@ -892,11 +892,6 @@ data = featureFormat(my_dataset, features_list, sort_keys = True)
 labels, features = targetFeatureSplit(data)
 features_train, features_test, labels_train, labels_test = train_test_split(features, labels, 
                                                                             test_size=0.3, random_state=42)
-```
-
-
-```python
-# Cross-validation for parameter tuning in grid search 
 sss = StratifiedShuffleSplit(n_splits = 100, test_size = 0.3, random_state = 0)
 ```
 
@@ -909,7 +904,7 @@ select = SelectKBest()
 clf = GaussianNB()
 
 steps = [
-		 # Preprocessing
+         # Scaling
          ('standard_scaler', scaler),
          
          # Feature selection
@@ -927,7 +922,7 @@ parameters = dict(feature_selection__k=[2, 3, 5, 6, 7, 8, 9, 10, 12])
 # Create, fit, and make predictions with grid search
 gs = GridSearchCV(pipeline,
                   param_grid=parameters,
-                  scoring="recall",
+                  scoring="f1",
                   cv=sss.split(features_train, labels_train),
                   error_score=0)
 gs.fit(features_train, labels_train)
@@ -935,7 +930,8 @@ gs.fit(features_train, labels_train)
 labels_predictions = gs.predict(features_test)
 
 
-print(" Best score: ", gs.best_score_ , "\n")
+print(" Best score: ", gs.best_score_ )
+print()
 
 classif_report = classification_report(labels_test, labels_predictions)
 
@@ -949,7 +945,8 @@ for bool, feature, score in zip(mask, features_list[1:], scores):
         kselect_features.append(feature)
         feat_importance.append([feature, round(score, 2)])
 feat_importance.sort(key=lambda x: x[1], reverse = True)
-print ("\n", "Optimum number of features, KBest: ", gs.best_params_['feature_selection__k'], "\n")
+print ("Optimum number of features, KBest: ", gs.best_params_['feature_selection__k'])
+print()
 for item in feat_importance:
     print('{} ===> {}'.format(item[0], item[1]))
 print()
@@ -957,10 +954,17 @@ print()
 kselect_features.insert(0, "poi")
 ```
 
-     Best score:  0.33 
+    /Users/jedfarm/anaconda/lib/python2.7/site-packages/sklearn/feature_selection/univariate_selection.py:113: UserWarning: Features [5] are constant.
+      UserWarning)
+    /Users/jedfarm/anaconda/lib/python2.7/site-packages/sklearn/feature_selection/univariate_selection.py:114: RuntimeWarning: invalid value encountered in divide
+      f = msb / msw
+    /Users/jedfarm/anaconda/lib/python2.7/site-packages/sklearn/metrics/classification.py:1135: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+      'precision', 'predicted', average, warn_for)
+
+
+     Best score:  0.291852258852
     
-    
-     Optimum number of features, KBest:  9 
+    Optimum number of features, KBest:  9
     
     bonus ===> 30.73
     to_poi_rate ===> 23.94
@@ -985,39 +989,43 @@ tester.main();
 ```
 
     Pipeline(memory=None,
-         steps=[('standard_scaler', StandardScaler(copy=True, with_mean=True, with_std=True)), ('feature_selection', SelectKBest(k=9, score_func=<function f_classif at 0x1092e37d0>)), ('clf', GaussianNB(priors=None))])
+         steps=[('standard_scaler', StandardScaler(copy=True, with_mean=True, with_std=True)), ('feature_selection', SelectKBest(k=9, score_func=<function f_classif at 0x10c8ec7d0>)), ('clf', GaussianNB(priors=None))])
     	Accuracy: 0.86453	Precision: 0.48938	Recall: 0.36850	F1: 0.42042	F2: 0.38765
     	Total predictions: 15000	True positives:  737	False positives:  769	False negatives: 1263	True negatives: 12231
     
 
 
+
+```python
+def best_features(clf, df, threshold):
+    feat_importance = []
+    for i in range(len(clf.feature_importances_)):
+        if clf.feature_importances_[i] > threshold:
+            feat_importance.append([df.columns[i+1], round(clf.feature_importances_[i], 2)])
+    feat_importance.sort(key=lambda x: x[1], reverse = True)
+    for item in feat_importance:
+        print(item[0], '===>', item[1])
+    clf_feat_list = [x[0] for x in feat_importance]
+    clf_feat_list.insert(0, 'poi')
+    return clf_feat_list
+```
+
 ### Decision Tree
 
 
 ```python
-clf = DecisionTreeClassifier()
+clf = DecisionTreeClassifier(random_state = 45)
 clf.fit(features_train, labels_train)
-
-feat_importance = []
-for i in range(len(clf.feature_importances_)):
-    if clf.feature_importances_[i] > 0:
-        feat_importance.append([df.columns[i+1], round(clf.feature_importances_[i], 2)])
-feat_importance.sort(key=lambda x: x[1], reverse = True)
 print('Most relevant features, Decision Tree:')
-for item in feat_importance:
-    print('{} ===> {}'.format(item[0], item[1]))
-print()
-tree_feat_list = [x[0] for x in feat_importance]
-tree_feat_list.insert(0, 'poi')
+tree_feat_list = best_features(clf, df, 0)
 ```
 
     Most relevant features, Decision Tree:
-    to_poi_rate ===> 0.41
-    shared_receipt_with_poi ===> 0.3
-    to_messages ===> 0.13
-    from_poi_to_this_person ===> 0.09
-    total_payments ===> 0.08
-    
+    to_poi_rate ===> 0.47
+    shared_receipt_with_poi ===> 0.37
+    bonus ===> 0.07
+    total_stock_value ===> 0.07
+    from_poi_to_this_person ===> 0.02
 
 
 
@@ -1030,7 +1038,7 @@ t_features_train, t_features_test, t_labels_train, t_labels_test = train_test_sp
 
 
 ```python
-parameters = dict(
+param_grid = dict(
                   criterion=['gini', 'entropy'],
                   splitter=['best', 'random'],
                   max_depth=[None, 1, 2, 3, 4],
@@ -1041,14 +1049,14 @@ parameters = dict(
                   random_state=[45], 
                   )
 
-dt_clf = GridSearchCV(DecisionTreeClassifier(random_state = 45), param_grid = parameters, cv=sss.split(
+dt_clf = GridSearchCV(DecisionTreeClassifier(random_state = 45), param_grid = param_grid, cv=sss.split(
                                           features_train, labels_train),scoring='f1')
 dt_clf.fit(t_features_train, t_labels_train)
 t_labels_predictions = dt_clf.predict(t_features_test)
 classif_report = classification_report(t_labels_test, t_labels_predictions)
 print("Decision Tree, best parameters set: ")
 for key in dt_clf.best_params_:
-    print(key, "==>", dt_clf.best_params_[key])
+    print(key, "===>", dt_clf.best_params_[key])
 
 ```
 
@@ -1083,8 +1091,8 @@ tester.main()
                 min_samples_leaf=1, min_samples_split=2,
                 min_weight_fraction_leaf=0, presort=False, random_state=45,
                 splitter='best')
-    	Accuracy: 0.90707	Precision: 0.61173	Recall: 0.82950	F1: 0.70416	F2: 0.77437
-    	Total predictions: 15000	True positives: 1659	False positives: 1053	False negatives:  341	True negatives: 11947
+    	Accuracy: 0.90680	Precision: 0.61082	Recall: 0.82950	F1: 0.70356	F2: 0.77408
+    	Total predictions: 15000	True positives: 1659	False positives: 1057	False negatives:  341	True negatives: 11943
     
 
 
@@ -1094,18 +1102,8 @@ tester.main()
 ```python
 clf = AdaBoostClassifier(random_state = 45)
 clf.fit(features_train, labels_train)
-
-feat_importance = []
-for i in range(len(clf.feature_importances_)):
-    if clf.feature_importances_[i] > 0.02:
-        feat_importance.append([df.columns[i+1], round(clf.feature_importances_[i], 2)])
-feat_importance.sort(key=lambda x: x[1], reverse = True)
 print("Most relevant features, AdaBoost:")
-for item in feat_importance:
-    print('{} ===> {}'.format(item[0], item[1]))
-print()
-boost_feat_list = [x[0] for x in feat_importance]
-boost_feat_list.insert(0, 'poi')
+boost_feat_list = best_features(clf, df, 0.02)
 ```
 
     Most relevant features, AdaBoost:
@@ -1119,7 +1117,6 @@ boost_feat_list.insert(0, 'poi')
     other ===> 0.06
     salary ===> 0.04
     exercised_stock_options ===> 0.04
-    
 
 
 
