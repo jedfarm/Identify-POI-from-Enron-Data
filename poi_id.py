@@ -90,7 +90,7 @@ test_df.loc[['BHATNAGAR SANJAY']] = test_df.loc[['BHATNAGAR SANJAY']].shift(
 df.update(test_df)
 
 ### Task 3: Create new feature(s)
-with open("new_data_df.pickle", "r") as data_file:
+with open("new_data_df.pickle", "rb") as data_file:
     df_new = pickle.load(data_file)
     df_new.drop(['TOTAL', 'THE TRAVEL AGENCY IN THE PARK', 'LOCKHART EUGENE E'], inplace = True)
     

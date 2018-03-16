@@ -338,7 +338,7 @@ print("Amount of remaining NaN entries in the dataframe:", df.isnull().sum().sum
     Amount of remaining NaN entries in the dataframe: 0
 
 
-As found in some of our references, the manual input of the financial data could have been the cause of some observed mistakes. 
+Checking out the correctness of the financial data. 
 
 
 ```python
@@ -534,11 +534,11 @@ The most straightforward manner of creating new features, in this case, is by us
 
 ### Finding the mysterious missing data
 
-Exploring the Enron email dataset proved to be a time-consuming task. After searching with an intricate pattern of regular expressions and using specific search criteria based on the observed email addresses patterns, we were able to find up to 424 different email addresses linked to the people under study. Our search methods were far from optimal as they included final manual adjudications in many cases. That is why we have reasons to believe that there could be more email addresses than the ones we were able to find (but we decided to leave that as a subject of a more detailed study to be carried out in the future). In any case, our search allowed us to find some of the missing email addresses, and with that information, we built the email-based existing features for the employees including those "strange 25 cases". The code is too large to be inserted here, but we provide a text file with the procedure followed alongside with the script files we used. We are going to load a dictionary we created, similar to data_dict in structure, but with the data we processed directly from the Enron email dataset. It also contains new features.
+Exploring the Enron email dataset proved to be a time-consuming task. After searching with an intricate pattern of regular expressions and using specific search criteria based on the observed email addresses patterns, we were able to find up to 424 different email addresses linked to the people under study. Our search methods were far from optimal as they included final manual adjudications in many cases. That is why we have reasons to believe that there could be more email addresses than the ones we were able to find (but we decided to leave that as a subject of a more detailed study to be carried out in the future). In any case, our search allowed us to find some of the missing email addresses, and with that information, we built the email-based existing features for the employees including those "strange 25 cases". The code is too large to be inserted here, but we provide a text file with the procedure followed alongside with the script files we used. We are going to load a dataframe we created, with the data we processed directly from the Enron email dataset.
 
 
 ```python
-with open("missing_data_df.pickle", "r") as data_file:
+with open("missing_data_df.pickle", "rb") as data_file:
     missing_data_df = pickle.load(data_file)
 
 missing_data_df = missing_data_df[missing_data_df.index.isin(strange_cases)]
@@ -844,7 +844,7 @@ In the second case, we created an intermediate feature, called pubIndex.  This o
 
 
 ```python
-with open("new_data_df.pickle", "r") as data_file:
+with open("new_data_df.pickle", "rb") as data_file:
     df_new = pickle.load(data_file)
     df_new.drop(['TOTAL', 'THE TRAVEL AGENCY IN THE PARK', 'LOCKHART EUGENE E'], inplace = True)
 
@@ -1130,6 +1130,8 @@ b_features_train, b_features_test, b_labels_train, b_labels_test = train_test_sp
                                                                             test_size=0.3, random_state=42)
 ```
 
+We realized that in the case of AdaBoost, applying a series of two consecutive tuning procedures is more efficient than using only one. We optimized first the parameters n_estimators and learning_rate that belong to the classifier, keeping the base estimator (Decision Tree in our case) with its default parameters. In a second stage, we used AdaBoost with the parameters previously found, and did a search over five parameters of the base estimator.
+
 
 ```python
 param_grid = {              
@@ -1314,5 +1316,7 @@ What is exciting about this project is that by using the full email data set, it
 3. http://www.infosys.tuwien.ac.at/staff/dschall/email/enron-employees.txt
 4. https://marcobonzanini.com/2015/02/25/fuzzy-string-matching-in-python/
 5. https://regex101.com
-8. https://rodgersnotes.wordpress.com/2013/11/19/enron-email-analysis-persons-of-interest/
-
+6. https://rodgersnotes.wordpress.com/2013/11/19/enron-email-analysis-persons-of-interest/
+7. http://scikit-learn.org/stable/documentation.html
+8. https://rapidminer.com/blog/validate-models-training-test-error/
+9. https://www.udemy.com/machinelearning/
