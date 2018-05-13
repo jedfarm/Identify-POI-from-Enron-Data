@@ -81,14 +81,12 @@ _Note that some of those files take hours to run in a MacBook Pro laptop (Intel 
 df['poi'].value_counts()
 ```
 
-
-
-
     0    128
     1     18
     Name: poi, dtype: int64
 
 
+Where 0: Non-poi  and 1: poi
 
 ### New features
 
@@ -110,49 +108,17 @@ In the second case, we created an intermediate feature, called pubIndex.  This o
 - to_poi_median_pubIndex: The same as above but considering just when sending messages to poi.
 
 
-
-
-```python
-features_list = poi_label + financial_feat_list + email_feat_list + ['to_poi_rate', 'from_poi_rate' ] + new_feat_list
-print("Total number of features: ", len(features_list)-1)
-```
-
-    Total number of features:  23
-
+ ###   Total number of features:  23
 
 
 
 After tunning our three classifiers, we obtained in general decent values for all the relevant metrics (as all of them comply with the minimum requirement of being above 0.3). It is worth mentioning that we tried this out using a fixed random state for the sake of reproducibility. If we remove this restriction,  the results obtained after running tester.py will change from one run to the next. However, as an average, we expect them to be close to those shown in the table below. 
 
 
-```python
-print("Final Results")
-pd.DataFrame([[0.864, 0.489, 0.368, 0.420], [0.907, 0.612, 0.829, 0.704],[0.923, 0.674, 0.819, 0.739]],
-             columns = ['Accuracy','Precision', 'Recall', 'F1'], 
-             index = ['GaussianNB', 'Decision Tree', 'AdaBoost'])
-
-```
-
-    Final Results
-
-
-
-
+### Final Results
 
 <div>
-<style>
-    .dataframe thead tr:only-child th {
-        text-align: right;
-    }
 
-    .dataframe thead th {
-        text-align: left;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
