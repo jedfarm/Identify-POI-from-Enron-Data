@@ -1,4 +1,4 @@
-# Identify POI from Enron data
+# Identify POI from Enron data      <img align="right" src="https://github.com/jedfarm/Identify-POI-from-Enron-Data/blob/master/Logo_Enron.png" width="200" height="200" />
 
 Enron, once called "America's most innovative company," went from reaching dramatic economic heights to bankruptcy in about a year, turning into one of the biggest financial scandals in America's history. 
 As part of the trials that followed, a dataset with most of the emails in Enron's servers was released to the public. Almost two decades later, it remains the biggest of its kind in the public domain and one of the most studied.
